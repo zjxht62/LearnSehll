@@ -60,4 +60,35 @@ c
 `printf "\n"`语句用来达到换行的效果，否则 echo 的输出结果会和用户输入的内容位于同一行，不容易区分。
 
 【实例3】在指定时间内输入密码。
+```shell
+#!/bin/bash
+if
+    read -t 20 -sp "Enter password in 20 seconds(once) > " pass1 && printf "\n" &&  #第一次输入密码
+    read -t 20 -sp "Enter password in 20 seconds(again)> " pass2 && printf "\n" &&  #第二次输入密码
+    [ $pass1 == $pass2 ]  #判断两次输入的密码是否相等
+then
+    echo "Valid password"
+else
+    echo "Invalid password"
+fi
+```
+在这段代码中，我们使用`&&`组合了多个命令，这些命令会依次执行，并且整体上作为if语句的判断条件，只要其中一个命令执行失败（退出状态为非0），那么整个条件就失败了，后续的命令也就没有执行的必要了。
 
+```shell
+如果两次输入密码相同，运行结果为：
+Enter password in 20 seconds(once) >
+Enter password in 20 seconds(again)>
+Valid password
+
+如果两次输入密码不同，运行结果为：
+Enter password in 20 seconds(once) >
+Enter password in 20 seconds(again)>
+Invalid password
+
+如果第一次输入超时，运行结果为：
+Enter password in 20 seconds(once) > Invalid password
+
+如果第二次输入超时，运行结果为：
+Enter password in 20 seconds(once) >
+Enter password in 20 seconds(again)> Invalid password
+```
