@@ -87,6 +87,83 @@ bc 有四个内置变量，我们在计算时会经常用到，如下表所示�
 
 ![img_7.png](img_7.png)
 
+# 在Shell中使用bc计算器
+在Shell脚本中，我们可以借助管道或者输入重定向来使用bc命令
++ 管道是 Linux 进程间的一种通信机制，它可以将前一个命令（进程）的输出作为下一个命令（进程）的输入，两个命令之间使用竖线|分隔。
++ 通常情况下，一个命令从终端获得用户输入的内容，如果让它从其他地方（比如文件）获得输入，那么就需要重定向。
+
+## 借助管道使用bc计算器
+如果读者希望直接输出 bc 的计算结果，那么可以使用下面的形式：
+```shell
+echo "expression" | bc
+```
+`expression`就是希望计算的数学表达式，它必须符合 bc 的语法，上面我们已经进行了介绍。在 expression 中，还可以使用 Shell 脚本中的变量。
+
+使用下面的形式可以将 bc 的计算结果赋值给 Shell 变量：
+```shell
+variable=$(echo "expression" | bc)
+```
+variable就是变量名
+
+【实例1】最简单的形式：
+```shell
+[root@vultr ~]# echo "3*8"|bc
+24
+[root@vultr ~]# ret=$(echo "4*9"|bc)
+[root@vultr ~]# echo $ret
+36
+```
+【实例2】使用 bc 中的变量：
+```shell
+[root@vultr ~]# echo "scale=4;3*8/7"|bc
+3.4285
+[root@vultr ~]# echo "scale=4;3*8/7;last*5"|bc
+3.4285
+17.1425
+```
+【实例3】使用Shell脚本中的变量
+```shell
+[root@vultr ~]# echo "scale=5;n=$x+2;e(n)"|bc -l
+403.42879
+```
+在第二条命令中，`$x`表示使用第一条 Shell 命令中定义的变量，`n`是在 bc 中定义的新变量，它和 Shell 脚本是没关系的。
+
+【实例4】进制转换：
+```shell
+#十进制转十六进制
+[mozhiyan@localhost ~]$ m=31
+[mozhiyan@localhost ~]$ n=$(echo "obase=16;$m"|bc)
+[mozhiyan@localhost ~]$ echo $n
+1F
+#十六进制转十进制
+[mozhiyan@localhost ~]$ m=1E
+[mozhiyan@localhost ~]$ n=$(echo "obase=10;ibase=16;$m"|bc)
+[mozhiyan@localhost ~]$ echo $n
+30
+```
+## 借助输入重定向使用 bc 计算器
+可以使用下面的形式将 bc 的计算结果赋值给 Shell 变量：
+```shell
+variable=$(bc << EOF
+expressions
+EOF
+)
+```
+其中，`variable`是 Shell 变量名，`express`是要计算的数学表达式（可以换行，和进入 bc 以后的书写形式一样），`EOF`是数学表达式的开始和结束标识（你也可以换成其它的名字，比如 aaa、bbb 等）。
+
+请看下面的例子：
+```shell
+[c.biancheng.net]$ m=1E
+[c.biancheng.net]$ n=$(bc << EOF
+> obase=10;
+> ibase=16;
+> print $m
+> EOF
+> )
+[c.biancheng.net]$ echo $n
+30
+```
+如果你有大量的数学计算，那么使用输入重定向就比较方便，因为数学表达式可以换行，写起来更加清晰明了。
 
 
 
