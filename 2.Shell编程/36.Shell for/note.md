@@ -191,7 +191,7 @@ do
   ((sum+=i))
 done
 echo "The sum is $sum"
-```
+``` 
 运行结果：
 ```
 5050
@@ -210,4 +210,126 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz
 ```
 可以发现，Shell 是根据 ASCII 码表来输出的。
 
+3)使用命令的执行结果
+
+使用反引号``或者`$()`都可以取的命令的执行结果。
+
+例如，计算从1到100之间所有偶数的和
+```shell
+#!/bin/bash
+
+sum=0
+
+for n in $(seq 2 2 100)
+do
+  ((sum+=n))
+done
+
+echo "$sum"
+```
+运行结果
+```shell
+2550
+```
+seq是一个Linux命令，用来产生某个范围内的整数，并且可以设置步长，`seq 2 2 100`表示从2开始，每次增加2，到100结束
+
+再如，列出当前目录下的所有 Shell 脚本文件：
+```shell
+#!/bin/bash
+
+for filename in $(ls *.sh)
+do
+  echo $filename
+done 
+```
+运行结果：
+```shell
+$ sh code11.sh
+code1.sh
+code10.sh
+code11.sh
+code2.sh
+code3.sh
+code4.sh
+code5.sh
+code6.sh
+code7.sh
+code8.sh
+code9.sh
+```
+
+ls 是一个 Linux 命令，用来列出当前目录下的所有文件，`*.sh`表示匹配后缀为`.sh`的文件，也就是 Shell 脚本文件。
+
+4)使用Shell通配符
+
+Shell通配符可以认为是一种精简化的正则表达式，通常用来匹配目录或者文件，而不是文本
+
+有了Shell通配符，不使用ls命令也能显示当前目录下的所有脚本文件
+```shell
+#!/bin/bash
+
+for filename in *.sh
+do
+  echo $filename
+done
+```
+运行结果：
+```shell
+$ sh code11.sh
+code1.sh
+code10.sh
+code11.sh
+code2.sh
+code3.sh
+code4.sh
+code5.sh
+code6.sh
+code7.sh
+code8.sh
+code9.sh
+```
+
+5)使用特殊变量
+
+Shell中有多个特殊变量，例如$#、$*、$@、$?、$$等，在value_list中可以使用他们
+```shell
+#!/bin/bash
+
+function func() {
+    for str in $@
+    do
+      echo $str
+    done
+}
+
+func C++ Java Python C#
+```
+运行结果：
+```shell
+$ sh code13.sh
+C++
+Java
+Python
+C#
+```
+其实，我们也可以省略 value_list，省略后的效果和使用$@一样。请看下面的演示：
+```shell
+#!/bin/bash
+function func() {
+    for str
+    do
+      echo $str
+    done
+}
+
+func C++ Java Python C#
+```
+运行结果：
+```shell
+$ sh code13.sh
+C++
+Java
+Python
+C#
+```
 
