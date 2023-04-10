@@ -34,3 +34,32 @@ Total 3 parameters
 ```
 注意，第 7 行代码的写法有点不同，这里使用了 Shell 字符串拼接技巧。
 
+【实例2】使用$@来遍历函数参数
+```shell
+#!/bin/bash
+
+function getsum() {
+    local sum=0
+
+    for n in $@
+    do
+      ((sum+=n))
+    done
+
+    echo $sum
+    return 0
+}
+
+# 调用函数并传递参数，最后将结果赋值给一个变量
+total=$(getsum 10 20 55 15)
+echo $total
+
+
+# 也可以将变量省略
+echo $(getsum 10 20 55 15)
+```
+运行结果
+```shell
+100
+100
+```
