@@ -67,3 +67,144 @@ nohup tcpreplay -i enp5s0 -K -M 10 udp-64.pcap > /dev/null 2>&1  &
 + 第一个重定向符号使用的是单个的`>`，表示覆盖写入，其实在这里用`>>`追加写入也行，但是没什么意义，反正之前的都丢弃了，还追加个啥劲呢。
 + `2>&1`表示把标准错误输出（2）重定向到标准输出（1）
 + 重定向数据流时， & 意味着后面是文件描述符，而不是文件名。 所以在`2>&1`中的`1`之前要加上`&`
+
+**输出重定向举例**
+【实例1】将echo命令的输出结果以追加的方式写入到demo.txt文件中
+```shell
+#!/bin/bash
+
+for str in "C语言中文网" "http://c.biancheng.net/" "成立7年了" "日IP数万"
+do
+  echo $str >> demo.txt
+done
+```
+运行上面的脚本，使用`cat demo.txt`命令查看文件内容，显示如下：
+```shell
+C语言中文网
+http://c.biancheng.net/
+成立7年了
+日IP数万
+```
+
+【实例2】将`ls -l`命令的输出结果重定向到文件中
+```shell
+[root@zntsa 1.Shell重定向]# ls -l   #先预览一下输出结果
+total 16
+-rw-r--r-- 1 root root  131 Apr 14 09:22 code1.sh
+-rw-r--r-- 1 root root    0 Apr 14  2023 code2.sh
+-rw-r--r-- 1 root root   67 Apr 14 09:21 demo.txt
+-rw-r--r-- 1 root root 5202 Apr 14  2023 note.md
+[root@zntsa 1.Shell重定向]# ls -l > demo.txt  #重定向
+[root@zntsa 1.Shell重定向]# cat demo.txt   # 查看文件内容
+total 12
+-rw-r--r-- 1 root root  131 Apr 14 09:22 code1.sh
+-rw-r--r-- 1 root root    0 Apr 14  2023 code2.sh
+-rw-r--r-- 1 root root    0 Apr 14 09:24 demo.txt
+-rw-r--r-- 1 root root 5202 Apr 14  2023 note.md
+
+```
+**错误输出重定向举例**
+命令正确执行是没有错误信息的，我们需要可以让明框执行出错，如下所示：
+```shell
+[root@zntsa ~]# ls java # 先预览一下出错信息
+ls: cannot access java: No such file or directory
+[root@zntsa ~]# ls java 2>err.log #错误输出重定向
+[root@zntsa ~]# cat err.log # 查看文件
+ls: cannot access java: No such file or directory
+```
+
+**正确输出和错误信息同时保存**
+
+【实例1】把正确结果和错误信息都保存到一个文件中，例如：
+```shell
+[root@zntsa ~]# ls java
+ls: cannot access java: No such file or directory
+[root@zntsa ~]# ls java 2>err.log
+[root@zntsa ~]# cat err.log 
+ls: cannot access java: No such file or directory
+[root@zntsa ~]# ls -l > out.log 2>&1
+[root@zntsa ~]# ls java >> out.log 2>&1
+[root@zntsa ~]# cat out.log 
+total 31390824
+-rw-r--r--   1 root    root         516904 Aug 12  2022 0.pcap
+-rw-r--r--   1 tcpdump tcpdump    19541131 Dec  3  2021 1203.pcap
+-rw-r--r--   1 tcpdump tcpdump        1050 Jul 16  2022 1.pcap
+ls: cannot access java: No such file or directory
+```
+out.log 的最后一行是错误信息，其它行都是正确的输出结果。
+
+【实例2】上面的实例将正确结果和错误信息都写入同一个文件中，这样会导致视觉上的混乱，不利于以后的检索，所以我建议把正确结果和错误信息分开保存到不同的文件中，也即写成下面的形式：
+```shell
+ls -l >>out.log 2>>err.log
+```
+这样一来，正确的输出结果会写入到 out.log，而错误的信息则会写入到 err.log。
+
+**/dev/null 文件**
+如果你既不想把命令的输出结果保存到文件，也不想把命令的输出结果显示到屏幕上，干扰命令的执行，那么可以把命令的所有结果重定向到 /dev/null 文件中。如下所示：
+```shell
+ls -l &>/dev/null
+```
+大家可以把 /dev/null 当成 Linux 系统的垃圾箱，任何放入垃圾箱的数据都会被丢弃，不能恢复。
+
+# Linux Shell 输入重定向
+输入重定向就是改变输入的方向，不再使用键盘作为命令输入的来源，而是使用文件作为命令的输入。
+
+![img_1.png](img_1.png)
+
+和输出重定向类似，输入重定向的完整写法是`fd<file`，其中fd表示文件描述符，如果不写，默认为0也就是标准输入文件
+
+**输入重定向举例**
+
+【示例1】统计文档中有多少行文字。
+
+Linux wc命令可以用来对文本进行统计，包括单词个数、行数、字节数，用法如下
+```shell
+wc  [选项]  [文件名]
+```
+其中，`-c`选项统计字节数，`-w`选项统计单词数，`-l`选项统计行数。
+
+统计 readme.txt 文件中有多少行文本：
+```shell
+[root@zntsa 1.Shell重定向]# cat readme.txt 
+asdf
+sdfsadf
+asdfasdf
+sdafaf
+sadfasd
+sdfsa
+qwweq
+[root@zntsa 1.Shell重定向]# wc -l <readme.txt 
+7
+```
+【实例2】逐行读取文件内容。
+```shell
+#!/bin/bash
+
+while read str; do
+    echo $str
+done <readme.txt
+```
+运行结果：
+```shell
+C语言中文网
+http://c.biancheng.net/
+成立7年了
+日IP数万
+```
+这种写法叫做代码块重定向，也就是把一组命令同时重定向到一个文件，我们将在《Shell代码块重定向》一节中详细讲解。
+
+【实例3】统计用户在终端输入的文本的行数。
+
+此处我们使用输入重定向符号`<<`，这个符号的作用是使用特定的分界符作为命令输入的结束标志，而不使用 Ctrl+D 键。
+```shell
+[c.biancheng.net]$ wc -l <<END
+> 123
+> 789
+> abc
+> xyz
+> END
+4
+```
+wc 命令会一直等待用输入，直到遇见分界符 END 才结束读取。
+
+`<<`之后的分界符可以自由定义，只要再碰到相同的分界符，两个分界符之间的内容将作为命令的输入（不包括分界符本身）。
