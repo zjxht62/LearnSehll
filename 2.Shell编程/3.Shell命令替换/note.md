@@ -1,5 +1,5 @@
 # Shell命令替换：将命令的输出结果赋值给变量
-Shell中有两种方式可以完成命令替换，一种是反引号```,一种是`$()`
+Shell中有两种方式可以完成命令替换，一种是反引号&#96;,一种是`$()`
 ```shell
 variable=`commands`
 variable=$(commands)
